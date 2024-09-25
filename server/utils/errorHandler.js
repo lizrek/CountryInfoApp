@@ -1,7 +1,7 @@
 const handleError = (res, error, message) => {
   if (error.response) {
     console.error(
-      `External API error: ${error.response.status} - ${error.response.data}`
+      `External API error: ${error.response.status} - ${JSON.stringify(error.response.data)}`
     );
     return res.status(error.response.status).json({
       message: message || 'Error from external API',

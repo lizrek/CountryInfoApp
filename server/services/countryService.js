@@ -1,58 +1,62 @@
 const axios = require('axios');
 
+require('dotenv').config();
+
 const axiosInstance = axios.create({
   timeout: 5000, // 5 seconds timeout
 });
 
-// Get available countries from Nager API
+// Get available countries
 const getAvailableCountries = async () => {
   const response = await axiosInstance.get(
-    'https://date.nager.at/api/v3/AvailableCountries'
+    `${process.env.AVAILABLE_COUNTRIES_BASE_URL}/AvailableCountries`
   );
   return response.data;
 };
 
-// Get flags for available countries from Countries Now API
-const getFlagsForCountries = async (countryNames) => {
-  const response = await axiosInstance.post(
-    'https://countriesnow.space/api/v0.1/countries/flag/images',
-    {
-      countries: countryNames,
-    }
-  );
-  return response.data.data;
-};
-
 // Get country info (borders, population, flag)
-const getCountryInfo = async (countryCode) => {
-  const [borderCountriesResponse, populationResponse, flagResponse] =
-    await Promise.all([
-      axiosInstance.get(
-        `https://date.nager.at/api/v3/CountryInfo/${countryCode}`
-      ),
-      axiosInstance.post(
-        'https://countriesnow.space/api/v0.1/countries/population',
-        {
-          country: countryCode,
-        }
-      ),
-      axiosInstance.post(
-        'https://countriesnow.space/api/v0.1/countries/flag/images',
-        {
-          country: countryCode,
-        }
-      ),
-    ]);
+const getCountryInfo = async (countryCode, countryName) => {
+  try {
+    const borderCountriesResponse = await axiosInstance.get(
+      `${process.env.AVAILABLE_COUNTRIES_BASE_URL}/CountryInfo/${countryCode}`
+    );
 
-  return {
-    borders: borderCountriesResponse.data.borders || [],
-    population: populationResponse.data.data.populationCounts || [],
-    flagURL: flagResponse.data.data.flag || '',
-  };
+    const { commonName, officialName, borders } = borderCountriesResponse.data;
+
+    let populationResponse;
+    try {
+      populationResponse = await axiosInstance.post(
+        `${process.env.COUNTRY_INFO_API_BASE_URL}/countries/population`,
+        { country: countryName || commonName }
+      );
+    } catch {
+      console.warn(
+        `Population data not found for ${countryName || commonName}. Retrying with official name...`
+      );
+
+      populationResponse = await axiosInstance.post(
+        `${process.env.COUNTRY_INFO_API_BASE_URL}/countries/population`,
+        { country: officialName }
+      );
+    }
+
+    const flagResponse = await axiosInstance.post(
+      `${process.env.COUNTRY_INFO_API_BASE_URL}/countries/flag/images`,
+      { iso2: countryCode }
+    );
+
+    return {
+      borders: borders || [],
+      population: populationResponse.data.data.populationCounts || [],
+      flagURL: flagResponse.data.data.flag || '',
+    };
+  } catch (error) {
+    console.error('Error fetching country info:', error);
+    throw error;
+  }
 };
 
 module.exports = {
   getAvailableCountries,
-  getFlagsForCountries,
   getCountryInfo,
 };

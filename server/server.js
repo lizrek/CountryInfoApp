@@ -6,7 +6,6 @@ const rateLimit = require('express-rate-limit');
 
 const {
   getAvailableCountries,
-  getFlagsForCountries,
   getCountryInfo,
 } = require('./services/countryService');
 const { handleError } = require('./utils/errorHandler');
@@ -31,15 +30,11 @@ app.use(limiter);
 app.get('/available-countries', async (req, res) => {
   try {
     const countries = await getAvailableCountries();
-    const countryNames = countries.map((country) => country.name);
-    const flagsData = await getFlagsForCountries(countryNames);
 
     const countriesWithFlags = countries.map((country) => {
-      const flag = flagsData.find((f) => f.name === country.name);
       return {
         name: country.name,
-        code: country.code,
-        flag: flag ? flag.flag : 'Flag not available',
+        code: country.countryCode,
       };
     });
 
@@ -58,9 +53,16 @@ app.get('/country-info/:countryCode', async (req, res) => {
   }
 
   try {
-    const countryInfo = await getCountryInfo(countryCode);
+    const countries = await getAvailableCountries();
+    const country = countries.find((c) => c.countryCode === countryCode);
+
+    if (!country) {
+      return res.status(404).json({ message: 'Country not found' });
+    }
+
+    const countryInfo = await getCountryInfo(countryCode, country.name); // Pass countryCode and country.name
     res.status(200).json({
-      country: countryCode,
+      country: country.name,
       borders: countryInfo.borders,
       population: countryInfo.population,
       flagURL: countryInfo.flagURL,
@@ -70,7 +72,7 @@ app.get('/country-info/:countryCode', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
