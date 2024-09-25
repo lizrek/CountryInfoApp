@@ -1,0 +1,88 @@
+# Node.js related files (backend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs
+*.log
+logs/*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for device specific cache data
+.cache/
+
+# Dependency directories (frontend and backend)
+client/node_modules/
+server/node_modules/
+
+# Ignore build files
+client/build/
+build/
+
+# Ignore package-lock and yarn.lock if using another dependency manager
+package-lock.json
+yarn.lock
+
+# Optional npm cache directory
+.npm/
+
+# IDE or text editor specific files
+.vscode/
+.idea/
+
+# MacOS system files
+.DS_Store
+
+# Environmental variables file (for both frontend and backend)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# React specific build files (frontend)
+client/.next/
+client/.nuxt/
+client/.out/
+client/.cache/
+
+# Ignore compiled CSS and Sass cache
+*.css.map
+*.sass-cache/
+*.scss-cache/
+
+# Ignore testing-related files
+coverage/
+*.lcov
+.nyc_output/
+
+# Ignore static website and public folder cache
+client/public/static/
+public/static/
+
+# Ignore generated service worker files
+client/service-worker.js
+serviceWorker.js
+
+# Ignore TypeScript cache
+*.tsbuildinfo
+
+# Ignore Express.js specific compiled output
+dist/
+build/
+
+# Ignore generated production assets
+client/.expo/
+client/public/build/
+
+# Ignore deployment-related files
+client/.firebase/
+firebase-debug.log
+client/.firebase/
